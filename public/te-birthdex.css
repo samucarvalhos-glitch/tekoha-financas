@@ -18,7 +18,7 @@ h1,h2,h3,.page-top h1,.simple-intro h1,.card h2,.card h3,.kpi strong,.metric-hug
  font-family:ui-rounded,"Arial Rounded MT Bold","Avenir Next","Trebuchet MS",system-ui,sans-serif;
  font-weight:850;letter-spacing:-.055em;
 }
-.sidebar{width:249px;flex-basis:249px;background:#fff9ec!important;color:#2a4035!important;border-right:1px solid #e4d8c8;box-shadow:none;padding:24px 15px 18px;}
+.sidebar{width:249px;flex-basis:249px;background:#fff9ec!important;color:#2a4035!important;border-right:1px solid #e4d8c8;box-shadow:none;padding:24px 15px 18px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;}
 .sidebar:before{height:6px;background:linear-gradient(90deg,#e26436 0 39%,#8468a8 39% 61%,#476f99 61% 80%,#2c3f32 80%);opacity:1;}
 .sidebar:after{display:none!important;}
 .brand{gap:11px;padding:14px 9px 26px;align-items:center;}
