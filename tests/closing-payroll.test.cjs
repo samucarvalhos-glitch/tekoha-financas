@@ -24,7 +24,7 @@ function analysis(){
  const code='const items=cfg.items,monthlyClosings=cfg.closings,salesRevenue=cfg.sales,stockWithdrawals=cfg.withdrawals,stockCourtesies=cfg.courtesies,cashWithdrawals=cfg.cash;'+
  'const moneyRound=v=>Math.round((Number(v)||0)*100)/100;const sum=(a,k="amount")=>moneyRound(a.reduce((v,t)=>v+(Number(t[k])||0),0));'+
  'const getMonth=t=>t.month||t.date?.slice(0,7);const realized=t=>t.status!=="Orçamento"&&t.includeInAnalysis!==false&&t.kind!=="ajuste";'+
- 'const isCredit=t=>String(t.method||"").includes("Crédito");const safeMonth=s=>/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(s);'+
+ 'const isCredit=t=>String(t.method||"").includes("Crédito");const paymentOwner=account=>String(account||"").includes("CNPJ")?"PJ":String(account||"").includes("CPF")?"PF":"Não informado";const safeMonth=s=>/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(s);'+
  'const courtesyTotal=m=>sum(stockCourtesies.filter(w=>w.date.slice(0,7)===m));const courtesyUnlinkedTotal=m=>sum(stockCourtesies.filter(w=>!w.purchaseId&&w.date.slice(0,7)===m));'+
  'const stockTotalPersonal=m=>sum(stockWithdrawals.filter(w=>w.date.slice(0,7)===m));const stockLinkedPersonal=m=>sum(stockWithdrawals.filter(w=>w.purchaseId&&w.date.slice(0,7)===m));'+
  'const billRows=()=>[{month:"2026-10",entity:"Tekoha Hub",amount:150,paid:true}];'+core+
