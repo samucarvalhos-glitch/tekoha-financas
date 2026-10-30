@@ -24,7 +24,7 @@ function analysis(){
  const code='const items=cfg.items,monthlyClosings=cfg.closings,salesRevenue=cfg.sales,stockWithdrawals=cfg.withdrawals,stockCourtesies=cfg.courtesies;'+
  'const moneyRound=v=>Math.round((Number(v)||0)*100)/100;const sum=(a,k="amount")=>moneyRound(a.reduce((v,t)=>v+(Number(t[k])||0),0));'+
  'const getMonth=t=>t.month||t.date?.slice(0,7);const realized=t=>t.status!=="Orçamento"&&t.includeInAnalysis!==false&&t.kind!=="ajuste";'+
- 'const isCredit=t=>String(t.method||"").includes("Crédito");const safeMonth=s=>/^\d{4}-(0[1-9]|1[0-2])$/.test(s);'+
+ 'const isCredit=t=>String(t.method||"").includes("Crédito");const safeMonth=s=>/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(s);'+
  'const courtesyTotal=m=>sum(stockCourtesies.filter(w=>w.date.slice(0,7)===m));const courtesyUnlinkedTotal=m=>sum(stockCourtesies.filter(w=>!w.purchaseId&&w.date.slice(0,7)===m));'+
  'const stockTotalPersonal=m=>sum(stockWithdrawals.filter(w=>w.date.slice(0,7)===m));const stockLinkedPersonal=m=>sum(stockWithdrawals.filter(w=>w.purchaseId&&w.date.slice(0,7)===m));'+
  'const billRows=()=>[{month:"2026-10",entity:"Tekoha Hub",amount:150,paid:true}];'+core+
@@ -41,8 +41,8 @@ function forms(){
  const code='const items=cfg.items,monthlyClosings=cfg.closings,salesRevenue=cfg.sales,ui=cfg.ui;'+
  'const STAFF_TYPES=["Salário","Diária","Bônus"],STAFF_METHODS=["Pix","Crédito","Débito","Dinheiro","Transferência","Boleto","Não informado"];'+
  'const $=id=>({value:cfg.fields[id]??""});const moneyRound=v=>Math.round((Number(v)||0)*100)/100;'+
- 'const asMoney=v=>{const s=String(v??"").replace(",",".");return Number(s)};const smartDate=v=>/^\d{4}-\d{2}-\d{2}$/.test(v)?v:"";'+
- 'const safeMonth=v=>/^\d{4}-(0[1-9]|1[0-2])$/.test(v);const paymentAccount=(method,owner)=>owner==="PJ"?"Conta PJ":owner==="PF"?"Conta PF":"Não informado";'+
+ 'const asMoney=v=>{const s=String(v??"").replace(",",".");return Number(s)};const smartDate=v=>/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(v)?v:"";'+
+ 'const safeMonth=v=>/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(v);const paymentAccount=(method,owner)=>owner==="PJ"?"Conta PJ":owner==="PF"?"Conta PF":"Não informado";'+
  'const saveItem=t=>{const n=items.findIndex(x=>x.id===t.id);if(n>=0)items[n]=t;else items.unshift(t);};'+
  'const save=()=>{cfg.saved++},render=()=>{cfg.rendered++},toast=t=>cfg.warnings.push(t);const confirm=()=>true;'+
  baseRecord+saveStaff+saveClosing+
