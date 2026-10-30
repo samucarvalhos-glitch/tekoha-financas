@@ -112,7 +112,7 @@ test('unknown beneficiary type is blocked',()=>{
  const x=forms();x.state.fields['staff-payee']='Qualquer outro';x.saveStaffExpense({preventDefault(){}});assert.equal(x.state.items.length,0);
 });
 test('insights page exists and shows shares and margins',()=>{
- for(const token of ['function insightsByCostsView()','data-page="costinsights"','insight-month','profitMarginNet','attractionShare','totalGrossCompanySpend'])assert.ok(js.includes(token),token);
+ for(const token of ['function insightsByCostsView()','insight-month','profitMarginNet','attractionShare','totalGrossCompanySpend'])assert.ok(js.includes(token),token);assert.ok(html.includes('data-page="costinsights"'));
 });
 test('financial close XLSX includes percentages, attractions and payee names',()=>{
  for(const token of ["name:'Insights de Custos'",'Atrações / despesas (%)',"t.payeeType||'Funcionário'","name:'Fechamento Mensal'"])assert.ok(js.includes(token),token);
