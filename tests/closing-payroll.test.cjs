@@ -34,12 +34,12 @@ function analysis(){
 function forms(){
  const items=[],monthlyClosings={},salesRevenue={},ui={staffEdit:'',staffMonth:'2026-10',closeMonth:'2026-10'},warnings=[];
  const fields={
- 'staff-name':'Pessoa A','staff-type':'Diária','staff-amount':'125,50','staff-date':'2026-10-30','staff-competence':'2026-10',
+ 'staff-name':'Pessoa A','staff-payee':'Funcionário','staff-event':'Evento do bar','staff-type':'Diária','staff-amount':'125,50','staff-date':'2026-10-30','staff-competence':'2026-10',
  'staff-method':'Pix','staff-owner':'PJ','staff-status':'Pago','staff-notes':'Evento','staff-parts':'1','staff-first':'2026-11',
  'close-gross':'10000','close-net':'8500','close-received':'8000','close-notes':'Taxas descontadas'
  };
  const code='const items=cfg.items,monthlyClosings=cfg.closings,salesRevenue=cfg.sales,ui=cfg.ui;'+
- 'const STAFF_TYPES=["Salário","Diária","Bônus"],STAFF_METHODS=["Pix","Crédito","Débito","Dinheiro","Transferência","Boleto","Não informado"];'+
+ 'const STAFF_TYPES=["Salário","Diária","Bônus","Cachê","Ajuda de custo","Outro pagamento"],PAYEE_TYPES=["Funcionário","Músico(a)","DJ","Banda / grupo","Artista / atração","Equipe técnica","Outro prestador"],STAFF_METHODS=["Pix","Crédito","Débito","Dinheiro","Transferência","Boleto","Não informado"];'+
  'const $=id=>({value:cfg.fields[id]??""});const moneyRound=v=>Math.round((Number(v)||0)*100)/100;'+
  'const asMoney=v=>{const s=String(v??"").replace(",",".");return Number(s)};const smartDate=v=>/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(v)?v:"";'+
  'const safeMonth=v=>/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(v);const paymentAccount=(method,owner)=>owner==="PJ"?"Conta PJ":owner==="PF"?"Conta PF":"Não informado";'+
@@ -68,7 +68,7 @@ test('closing validates gross/net relationship',()=>{
 });
 test('salary/daily/bonus register as a single company expense',()=>{
  const x=forms();x.saveStaffExpense({preventDefault(){}});
- assert.equal(x.state.items.length,1);const t=x.state.items[0];assert.equal(t.staffExpense,true);assert.equal(t.staffType,'Diária');assert.equal(t.amount,125.5);assert.equal(t.entity,'Tekoha Hub');assert.equal(t.area,'Rotina');assert.equal(t.account,'Conta PJ');assert.equal(t.paymentStatus,'Pago');assert.equal(t.month,'2026-10');
+ assert.equal(x.state.items.length,1);const t=x.state.items[0];assert.equal(t.staffExpense,true);assert.equal(t.staffType,'Diária');assert.equal(t.amount,125.5);assert.equal(t.entity,'Tekoha Hub');assert.equal(t.area,'Rotina');assert.equal(t.account,'Conta PJ');assert.equal(t.paymentStatus,'Pago');assert.equal(t.month,'2026-10');assert.equal(t.payeeType,'Funcionário');assert.equal(t.staffEvent,'Evento do bar');
 });
 test('editing payroll preserves the same ID and does not duplicate expense',()=>{
  const x=forms();x.saveStaffExpense({preventDefault(){}});const id=x.state.items[0].id;
@@ -97,4 +97,23 @@ test('full backups include closing; no bank transactions auto-created',()=>{
 });
 test('XLSX exports company closing and payroll separately',()=>{
  assert.ok(js.includes("name:'Fechamento Mensal'"));assert.ok(js.includes("name:'Equipe e Funcionários'"));
+});
+
+test('DJ receives cachê and is classified as attraction',()=>{
+ const x=forms();x.state.fields['staff-name']='DJ convidado';x.state.fields['staff-payee']='DJ';x.state.fields['staff-type']='Cachê';x.state.fields['staff-amount']='750,00';
+ x.saveStaffExpense({preventDefault(){}});
+ const t=x.state.items[0];assert.equal(x.state.items.length,1);assert.equal(t.payeeType,'DJ');assert.equal(t.staffType,'Cachê');assert.equal(t.amount,750);assert.equal(t.category,'Atrações / Cachê');
+});
+test('Band or group is one expense, not each member duplicated',()=>{
+ const x=forms();x.state.fields['staff-name']='Banda convidada';x.state.fields['staff-payee']='Banda / grupo';x.state.fields['staff-type']='Cachê';x.state.fields['staff-amount']='1200,00';x.saveStaffExpense({preventDefault(){}});
+ assert.equal(x.state.items.length,1);assert.equal(x.state.items[0].amount,1200);
+});
+test('unknown beneficiary type is blocked',()=>{
+ const x=forms();x.state.fields['staff-payee']='Qualquer outro';x.saveStaffExpense({preventDefault(){}});assert.equal(x.state.items.length,0);
+});
+test('insights page exists and shows shares and margins',()=>{
+ for(const token of ['function insightsByCostsView()','data-page="costinsights"','insight-month','profitMarginNet','attractionShare','totalGrossCompanySpend'])assert.ok(js.includes(token),token);
+});
+test('financial close XLSX includes percentages, attractions and payee names',()=>{
+ for(const token of ["name:'Insights de Custos'",'Atrações / despesas (%)',"t.payeeType||'Funcionário'","name:'Fechamento Mensal'"])assert.ok(js.includes(token),token);
 });
