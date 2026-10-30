@@ -730,6 +730,7 @@ function saveStaffExpense(e){
  if(method==='Crédito'&&(!Number.isInteger(parts)||parts<1||parts>120||!safeMonth(first))){toast('Confira parcelas e primeira fatura.');return;}
  const old=items.find(t=>t.id===ui.staffEdit&&t.staffExpense===true);
  if(old?.paidInstallments?.length&&(method!=='Crédito'||parts!==old.installments||first!==old.firstBillMonth)){toast('Reverta a baixa das parcelas antes de alterar o cartão.');return;}
+ if(!old&&items.some(t=>t.kind==='despesa'&&t.entity==='Tekoha Hub'&&t.date===date&&Math.abs(Number(t.amount)-moneyRound(amount))<0.01&&((t.staffExpense===true&&normTxt(t.employeeName)===normTxt(name))||(!t.staffExpense&&normTxt(t.description).includes(normTxt(name)))))){if(!confirm('Possível pagamento duplicado para '+name+' na mesma data e valor. Confirma que é outro pagamento?'))return;}
  const id=old?.id||'STAFF-'+Date.now()+'-'+Math.floor(Math.random()*99999);
  const t=asBaseRecord(id,type+' — '+name,moneyRound(amount),date,method,'Empresa','Equipe / '+type,paymentAccount(method,owner),method==='Crédito'?parts:1,method==='Crédito'?first:'',notes);
  t.staffExpense=true;t.employeeName=name;t.staffType=type;t.payeeType=payeeType;t.staffEvent=staffEvent;t.area='Rotina';t.entity='Tekoha Hub';t.month=month;t.nature='Equipe, artistas e atrações';t.paymentStatus=method==='Crédito'?'A pagar':status;t.category=payeeType==='Funcionário'?'Equipe / '+type:payeeType==='Equipe técnica'?'Técnica / '+type:'Atrações / '+type;t.categorySource='Manual';t.aiStatus='Registro manual';t.paidInstallments=old?.paidInstallments||[];
@@ -806,6 +807,7 @@ function closingView(){
  summaryRow('Faturamento bruto',x.gross===null?'Pendente':currency(x.gross))+
  summaryRow('(−) Deduções entre bruto e líquido',c?currency(moneyRound(x.gross-x.net)):'Pendente')+
  summaryRow('(=) Receita líquida informada',x.net===null?'Pendente':currency(x.net))+
+ summaryRow('Gasto total da empresa incluindo reforma/investimentos (referência)',currency(x.totalCompanyOutlays))+
  summaryRow('(−) Gastos operacionais',currency(x.operating))+
  summaryRow('(−) Equipe e funcionários',currency(x.team))+
  summaryRow('(−) Atrações: DJs, bandas, músicos e cachês',currency(x.attractions))+
