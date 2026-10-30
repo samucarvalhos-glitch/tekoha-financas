@@ -13,7 +13,7 @@
  let items=[lot],stockWithdrawals=personalRows,stockCourtesies=courtesyRows;
  const moneyRound=v=>Math.round((Number(v)||0)*100)/100;
  const sum=(a,k='amount')=>moneyRound(a.reduce((v,t)=>v+(Number(t[k])||0),0));
- const smartDate=v=>/^\d{4}-\d{2}-\d{2}$/.test(v)?v:'';
+ const smartDate=v=>/^\\d{4}-\\d{2}-\\d{2}$/.test(v)?v:'';
  const validItem=t=>t.includeInAnalysis!==false&&t.kind!=='ajuste';
  const realized=t=>validItem(t)&&t.status!=='Orçamento';
  const getMonth=t=>t.month||t.date?.slice(0,7);
