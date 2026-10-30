@@ -404,7 +404,7 @@ function validMonthlyClosings(obj){
 }
 function companyMonthlyStatement(m){
  const closing=monthlyClosings[m]||null;
- const expenses=items.filter(t=>realized(t)&&t.kind==='despesa'&&t.entity==='Tekoha Hub'&&getMonth(t)===m);
+ const expenses=items.filter(t=>realized(t)&&t.kind==='despesa'&&t.entity==='Tekoha Hub'&&(t.area==='Rotina'||t.area==='Compras para revenda')&&getMonth(t)===m);
  const staff=expenses.filter(t=>t.staffExpense===true&&t.area==='Rotina');
  const routine=expenses.filter(t=>t.area==='Rotina'&&!t.staffExpense);
  const purchases=expenses.filter(t=>t.area==='Compras para revenda');
