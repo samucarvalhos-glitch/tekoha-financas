@@ -20,8 +20,8 @@ const monthly={gross:5000,net:4500,received:4000,notes:''};
 function analysis(){
  const items=[purchase,employee,operation,personal,reform,directIncome];
  const monthlyClosings={'2026-10':monthly},salesRevenue={'2026-10':5000};
- const stockWithdrawals=[{purchaseId:'REV',date:'2026-10-27',amount:50}],stockCourtesies=[{purchaseId:'REV',date:'2026-10-28',amount:80},{purchaseId:'',date:'2026-10-28',amount:30}];
- const code='const items=cfg.items,monthlyClosings=cfg.closings,salesRevenue=cfg.sales,stockWithdrawals=cfg.withdrawals,stockCourtesies=cfg.courtesies;'+
+ const stockWithdrawals=[{purchaseId:'REV',date:'2026-10-27',amount:50}],stockCourtesies=[{purchaseId:'REV',date:'2026-10-28',amount:80},{purchaseId:'',date:'2026-10-28',amount:30}],cashWithdrawals=[];
+ const code='const items=cfg.items,monthlyClosings=cfg.closings,salesRevenue=cfg.sales,stockWithdrawals=cfg.withdrawals,stockCourtesies=cfg.courtesies,cashWithdrawals=cfg.cash;'+
  'const moneyRound=v=>Math.round((Number(v)||0)*100)/100;const sum=(a,k="amount")=>moneyRound(a.reduce((v,t)=>v+(Number(t[k])||0),0));'+
  'const getMonth=t=>t.month||t.date?.slice(0,7);const realized=t=>t.status!=="Orçamento"&&t.includeInAnalysis!==false&&t.kind!=="ajuste";'+
  'const isCredit=t=>String(t.method||"").includes("Crédito");const safeMonth=s=>/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(s);'+
@@ -29,7 +29,7 @@ function analysis(){
  'const stockTotalPersonal=m=>sum(stockWithdrawals.filter(w=>w.date.slice(0,7)===m));const stockLinkedPersonal=m=>sum(stockWithdrawals.filter(w=>w.purchaseId&&w.date.slice(0,7)===m));'+
  'const billRows=()=>[{month:"2026-10",entity:"Tekoha Hub",amount:150,paid:true}];'+core+
  'return {companyMonthlyStatement,validMonthlyClosings,staffRecords};';
- return Function('cfg',code)({items,closings:monthlyClosings,sales:salesRevenue,withdrawals:stockWithdrawals,courtesies:stockCourtesies});
+ return Function('cfg',code)({items,closings:monthlyClosings,sales:salesRevenue,withdrawals:stockWithdrawals,courtesies:stockCourtesies,cash:cashWithdrawals});
 }
 function forms(){
  const items=[],monthlyClosings={},salesRevenue={},ui={staffEdit:'',staffMonth:'2026-10',closeMonth:'2026-10'},warnings=[];
@@ -116,4 +116,29 @@ test('insights page exists and shows shares and margins',()=>{
 });
 test('financial close XLSX includes percentages, attractions and payee names',()=>{
  for(const token of ["name:'Insights de Custos'",'Atrações / despesas (%)',"t.payeeType||'Funcionário'","name:'Fechamento Mensal'"])assert.ok(js.includes(token),token);
+});
+
+test('shares add up to 100 percent before personal reclassification',()=>{
+ const x=analysis().companyMonthlyStatement('2026-10');
+ assert.equal(x.totalGrossCompanySpend,1730);
+ assert.equal(x.breakdown.reduce((a,b)=>a+b.value,0),1730);
+ assert.ok(Math.abs(x.breakdown.reduce((a,b)=>a+b.share,0)-100)<0.15);
+});
+test('artistic fees and payroll are distinct inside the total spend',()=>{
+ const x=analysis().companyMonthlyStatement('2026-10');
+ assert.equal(x.team,500);assert.equal(x.attractions,0);assert.equal(x.personnel,x.team+x.attractions);
+});
+test('margins are percent of declared revenue and estimated result',()=>{
+ const x=analysis().companyMonthlyStatement('2026-10');
+ assert.equal(x.profitMarginNet,Math.round((2820/4500)*10000)/100);
+ assert.equal(x.profitMarginGross,Math.round((2820/5000)*10000)/100);
+ assert.equal(x.costShareNet,Math.round((1680/4500)*10000)/100);
+});
+test('investments included in company total but excluded from operational profit',()=>{
+ const x=analysis().companyMonthlyStatement('2026-10');
+ assert.equal(x.investments,5000);assert.equal(x.totalCompanyOutlays,6730);
+ assert.equal(x.estimatedResult,2820);
+});
+test('insights include spend categories and profit percentage in exported XLSX',()=>{
+ for(const token of ["name:'Insights de Custos'", "'Atrações / despesas (%)'",'profitMarginGross','profitMarginNet','totalCompanyOutlays'])assert.ok(js.includes(token),token);
 });
