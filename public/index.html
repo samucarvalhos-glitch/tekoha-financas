@@ -755,6 +755,9 @@ function insightsByCostsView(){
  const opValue=r.totalGrossCompanySpend;
  const detailed=items.filter(t=>t.staffExpense===true&&t.entity==='Tekoha Hub'&&realized(t)&&getMonth(t)===m);
  const kinds=PAYEE_TYPES.map(type=>({label:type,value:sum(detailed.filter(t=>(t.payeeType||'Funcionário')===type)),count:detailed.filter(t=>(t.payeeType||'Funcionário')===type).length})).filter(x=>x.value>0);
+ const perPerson=new Map();for(const t of detailed){const key=(t.payeeType||'Funcionário')+' | '+(t.employeeName||t.description);const rec=perPerson.get(key)||{label:key,count:0,value:0};rec.count++;rec.value=moneyRound(rec.value+Number(t.amount||0));perPerson.set(key,rec);}
+ const topPayees=[...perPerson.values()].sort((a,b)=>b.value-a.value).slice(0,20);
+ const byPayType=STAFF_TYPES.map(label=>({label,value:sum(detailed.filter(t=>t.staffType===label))})).filter(x=>x.value>0);
  const costRow=x=>'<div class="mini-stat"><span>'+esc(x.label)+' · <b>'+percentLabel(x.share)+'</b> das despesas da empresa'+(hasClose?' · '+percentLabel(x.revenueShare)+' do líquido':'')+'</span><strong>'+currency(x.value)+'</strong></div>';
  const barRows=r.breakdown.map(x=>({label:x.label,value:x.value})).filter(x=>x.value>0);
  const past=Object.keys(monthlyClosings).sort().reverse().slice(0,12);
@@ -772,6 +775,8 @@ function insightsByCostsView(){
  '<div class="simple-card"><h3>Gastos totais da empresa, incluindo investimentos</h3>'+costRow({label:'Operação + revenda + equipe, antes de ajustes',value:r.totalGrossCompanySpend,share:pct(r.totalGrossCompanySpend,r.totalCompanyOutlays),revenueShare:null})+costRow({label:'Reforma e investimento (separado do lucro operacional)',value:r.investments,share:r.investmentShare,revenueShare:null})+'<div class="mini-stat"><span><b>Total de despesas e investimentos registrados no mês</b></span><strong>'+currency(r.totalCompanyOutlays)+'</strong></div><p class="footnote">Reforma não é subtraída do lucro operacional. Compras históricas identificadas como duplicadas por vínculo são excluídas desse total. Outros registros sem vínculo ainda podem necessitar revisão.</p></div>'+
  '<div class="simple-card"><h3>Equipe e atrações: distribuição por beneficiário</h3>'+
  (kinds.length?kinds.map(x=>'<div class="mini-stat"><span>'+esc(x.label)+' · '+x.count+' pagamento(s) · '+percentLabel(pct(x.value,r.totalGrossCompanySpend))+' das despesas totais</span><strong>'+currency(x.value)+'</strong></div>').join(''):'<p class="footnote">Nenhum cachê ou pagamento da equipe informado neste mês.</p>')+
+ '<h4>Natureza dos pagamentos</h4>'+(byPayType.length?byPayType.map(x=>'<div class="mini-stat"><span>'+esc(x.label)+' · '+percentLabel(pct(x.value,r.totalGrossCompanySpend))+' das despesas da empresa</span><strong>'+currency(x.value)+'</strong></div>').join(''):'<p class="footnote">Sem valores.</p>')+
+ '<h4>Quem recebeu mais neste mês</h4>'+(topPayees.length?topPayees.map(x=>'<div class="mini-stat"><span>'+esc(x.label)+' · '+x.count+' lançamento(s) · '+percentLabel(pct(x.value,r.totalGrossCompanySpend))+' dos gastos</span><strong>'+currency(x.value)+'</strong></div>').join(''):'<p class="footnote">Sem registros.</p>')+
  '<p class="footnote">Cachês dos grupos e bandas representam um único pagamento por registro, sem multiplicar pelo número de integrantes. Cortesias e permutas são registradas em aba própria.</p></div>'+
  '<div class="simple-card"><h3>Indicadores de evolução</h3>'+
  '<div class="mini-stat"><span>Faturamento bruto</span><strong>'+(hasClose?currency(r.gross):'Não informado')+'</strong></div>'+
