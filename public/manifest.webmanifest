@@ -7,9 +7,15 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f5e6ca",
-  "theme_color": "#24473a",
+  "background_color": "#f6eddf",
+  "theme_color": "#e26436",
   "icons": [
+    {
+      "src": "/icons/te-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
