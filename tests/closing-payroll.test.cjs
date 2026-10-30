@@ -13,14 +13,14 @@ const baseRecord=section('function asBaseRecord(', 'function saveItem(t){');
 const purchase={id:'REV',area:'Compras para revenda',entity:'Tekoha Hub',kind:'despesa',status:'Registrado',date:'2026-10-15',month:'2026-10',amount:1000,method:'Pix',paymentStatus:'Pago'};
 const employee={id:'STAFF0',area:'Rotina',entity:'Tekoha Hub',kind:'despesa',staffExpense:true,staffType:'Diária',employeeName:'Músico de apoio',date:'2026-10-28',month:'2026-10',amount:500,method:'Pix',paymentStatus:'Pago',status:'Registrado'};
 const operation={id:'OP',area:'Rotina',entity:'Tekoha Hub',kind:'despesa',date:'2026-10-28',month:'2026-10',amount:200,method:'Pix',paymentStatus:'Pago',status:'Registrado'};
-const personal={id:'PESS',area:'Rotina',entity:'Pessoal',kind:'despesa',date:'2026-10-28',month:'2026-10',amount:100,status:'Registrado'};
+const personal={id:'PESS',area:'Rotina',entity:'Pessoal',kind:'despesa',date:'2026-10-28',month:'2026-10',amount:100,status:'Registrado',method:'Pix',account:'Conta PJ',paymentStatus:'Pago'};
 const reform={id:'REF',area:'Reforma e aquisições',entity:'Tekoha Hub',kind:'despesa',date:'2026-10-28',month:'2026-10',amount:5000,status:'Registrado'};
 const directIncome={id:'REC',area:'Rotina',entity:'Tekoha Hub',kind:'receita',date:'2026-10-29',month:'2026-10',amount:4000,status:'Registrado'};
 const monthly={gross:5000,net:4500,received:4000,notes:''};
 function analysis(){
  const items=[purchase,employee,operation,personal,reform,directIncome];
  const monthlyClosings={'2026-10':monthly},salesRevenue={'2026-10':5000};
- const stockWithdrawals=[{purchaseId:'REV',date:'2026-10-27',amount:50}],stockCourtesies=[{purchaseId:'REV',date:'2026-10-28',amount:80},{purchaseId:'',date:'2026-10-28',amount:30}],cashWithdrawals=[];
+ const stockWithdrawals=[{purchaseId:'REV',date:'2026-10-27',amount:50}],stockCourtesies=[{purchaseId:'REV',date:'2026-10-28',amount:80},{purchaseId:'',date:'2026-10-28',amount:30}],cashWithdrawals=[{status:'Ativa',sourceAccount:'CNPJ/PJ',date:'2026-10-29',amount:50}];
  const code='const items=cfg.items,monthlyClosings=cfg.closings,salesRevenue=cfg.sales,stockWithdrawals=cfg.withdrawals,stockCourtesies=cfg.courtesies,cashWithdrawals=cfg.cash;'+
  'const moneyRound=v=>Math.round((Number(v)||0)*100)/100;const sum=(a,k="amount")=>moneyRound(a.reduce((v,t)=>v+(Number(t[k])||0),0));'+
  'const getMonth=t=>t.month||t.date?.slice(0,7);const realized=t=>t.status!=="Orçamento"&&t.includeInAnalysis!==false&&t.kind!=="ajuste";'+
@@ -60,7 +60,7 @@ test('monthly cost excludes personal and reform and avoids duplicated courtesy',
 test('profit from declared net minus recorded company expenses',()=>assert.equal(analysis().companyMonthlyStatement('2026-10').estimatedResult,2820));
 test('individual income not double counted',()=>assert.equal(analysis().companyMonthlyStatement('2026-10').unreconciledIncomes,4000));
 test('cash from received minus confirmed payments is partial',()=>{
- const x=analysis().companyMonthlyStatement('2026-10');assert.equal(x.confirmedCash,1700);assert.equal(x.confirmedBills,150);assert.equal(x.estimatedCashBalance,2150);
+ const x=analysis().companyMonthlyStatement('2026-10');assert.equal(x.confirmedCash,1700);assert.equal(x.confirmedBills,150);assert.equal(x.personalByCompany,100);assert.equal(x.ownerWithdrawals,50);assert.equal(x.confirmedOut,2000);assert.equal(x.estimatedCashBalance,2000);
 });
 test('missing revenue does not fabricate profit',()=>assert.equal(analysis().companyMonthlyStatement('2026-11').estimatedResult,null));
 test('closing validates gross/net relationship',()=>{
