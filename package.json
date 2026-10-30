@@ -7,6 +7,6 @@
     "test": "node --test tests/*.test.cjs"
   },
   "engines": {
-    "node": ">=20"
+    "node": "24.x"
   }
 }
